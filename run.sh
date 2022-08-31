@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ -d "chaoxing_slidecaptcha_verify.pth" ]; then
+if [ ! -d "chaoxing_slidecaptcha_verify.pth" ]; then
   wget https://cdn.9cats.link/chaoxing_slidecaptcha_verify.pth
 fi
 
