@@ -2,7 +2,6 @@
 import urllib3
 import requests
 import os, base64
-import matplotlib.pyplot as plt
 from io import BytesIO
 from PIL import Image
 

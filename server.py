@@ -9,6 +9,9 @@ host = ('0.0.0.0', 8888)
 
 true  = True
 false = False
+
+sessions_cache = []
+
 # 回调
 def callback(json):
   return json
@@ -42,7 +45,7 @@ def getSlideCaptcha(num):
 
 # 验证
 def verifySlideCaptcha(tokens, result):
-  # validates = []
+  sessions = []
   for token,x in zip(tokens,result):
     response = requests.get(
       "http://captcha.chaoxing.com/captcha/check/verification/result", 
@@ -61,9 +64,12 @@ def verifySlideCaptcha(tokens, result):
     
     data = eval(response.text)
     print(data)
-
-  # validates
-
+    if data['result']:
+      sessions.append({
+        "token": token,
+        "validate": eval(data['extraData'])['validate']
+      })
+  return sessions
 
 
 class RequestHandler(BaseHTTPRequestHandler):
@@ -77,12 +83,20 @@ class RequestHandler(BaseHTTPRequestHandler):
     
     # 前端获取一个 validate
     if path == "/validate/pop":
-      data = {
-        'success': True,
-        'msg': 'null',
-        'token': '123',
-        'validate': '123'  
-      }
+      if len(sessions_cache) > 0:
+        session = sessions_cache.pop(0)
+        data = {
+          'success': True,
+          'msg': 'null',
+          'token': session['token'],
+          'validate': session['validate']
+        }
+      else:
+        data = {
+          'success': False,
+          'msg': 'no enough session cache'
+        }
+      
       self.wfile.write(json.dumps(data).encode())
     
     # 后端储存 n 个 validate
@@ -95,9 +109,11 @@ class RequestHandler(BaseHTTPRequestHandler):
       # 检测
       result = delect(images)
       # 验证
-      verifySlideCaptcha(tokens, result)
+      sessions = verifySlideCaptcha(tokens, result)
       # validates = verifySlideCaptcha(tokens, result)
-      #print(validates)
+      # print(sessions)
+      sessions_cache.extend(sessions)
+      print(sessions_cache)
 
       data = {
         'success': True,
