@@ -5,7 +5,7 @@ import json
 
 from detect import *
 
-host = ('0.0.0.0', 8888)
+host = ('', 8888)
 
 true  = True
 false = False
