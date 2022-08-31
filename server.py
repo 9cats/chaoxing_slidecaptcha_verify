@@ -117,7 +117,17 @@ class RequestHandler(BaseHTTPRequestHandler):
 
       data = {
         'success': True,
-        'msg': 'null',
+        'cache': 'cache : {}'.format(len(sessions_cache))
+      }
+      self.wfile.write(json.dumps(data).encode())
+
+    # 后端储存 n 个 validate
+    elif path == "/validate/clear":
+      sessions_cache = []
+
+      data = {
+        'success': True,
+        'msg': 'clear sessions cache',
       }
       self.wfile.write(json.dumps(data).encode())
 
