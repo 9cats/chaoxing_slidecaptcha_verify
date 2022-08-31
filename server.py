@@ -74,6 +74,8 @@ def verifySlideCaptcha(tokens, result):
 
 class RequestHandler(BaseHTTPRequestHandler):
   def do_GET(self):
+    global sessions_cache
+
     self.send_response(200)
     self.send_header('Content-type', 'application/json')
     self.end_headers()
