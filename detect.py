@@ -26,14 +26,14 @@ batch_size     = 1    # size of the batches
 n_cpu          = 0    # number of cpu threads to use during batch generation
 img_size       = 416  # size of each image dimension
 
-origin_img_width = 280
-origin_img_height = 171
+origin_img_width = 320
+origin_img_height = 160
 
 def base64ImgData_covert_TensorImg(images):
   tersonImages = []
   for image in images:
-    image_data             = base64.b64decode(image)
-    image_obj              = Image.open(BytesIO(image_data))
+    # image_data             = base64.b64decode(image)
+    image_obj              = Image.open(BytesIO(image))
     image_tensor           = transforms.ToTensor()(image_obj.convert('RGB'))
     image_tensor_square, _ = pad_to_square(image_tensor, 0)
     image_tensor_resize    = resize(image_tensor_square, img_size)
@@ -89,7 +89,7 @@ def delect(images):
         cls_conf = 0
     x1 = x1 / img_size * origin_img_width
 
-    x = int(x1) - 6
+    x = int(x1) - 5
     
     print(detections)
     print("\t+ Label: %s, Conf: %.5f" % ("target", cls_conf))

@@ -2,6 +2,7 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 import requests
 import json
+import random
 
 from detect import *
 
@@ -52,10 +53,12 @@ def verifySlideCaptcha(tokens, result):
       params = {
         "callback": "callback",
         "captchaId": "42sxgHoTPTKbt0uZxPJ7ssOvtXr3ZgZ1",
+        "type": "slide",
         "token": token,
         "textClickArr": ('[{{\"x\":{x}}}]').format(x = x),
         "coordinate": "[]",
-        "runEnv": "10"
+        "runEnv": "10",
+        "version": "1.1.13"
       },
       headers = {
       "Referer": "http://office.chaoxing.com/",
@@ -141,6 +144,47 @@ class RequestHandler(BaseHTTPRequestHandler):
       }
       self.wfile.write(json.dumps(data).encode())      
 
+  def do_POST(self):
+    global sessions_cache
+
+    self.send_response(200)
+    self.send_header('Content-type', 'application/json')
+    self.end_headers()
+
+    # 获取路径
+    path = self.path
+    print(path)
+
+    if path == "/validate/get":
+      # 获取路径
+      content_len = int(self.headers.get('Content-Length'))
+      post_body = self.rfile.read(content_len)
+      res = json.loads(post_body.decode('utf-8'))
+
+      tokens = []
+      images = []
+      for data in res['imageVerificationList']:
+        if data["success"]:
+          tokens.append(data['token'])
+          request = requests.get(data["imageVerificationVo"]["shadeImage"])
+          image_data = request.content
+          images.append(image_data)
+
+      # print(tokens, images)
+      # 检测
+      result = delect(images)
+      # 验证
+      sessions = verifySlideCaptcha(tokens, result)
+      # validates = verifySlideCaptcha(tokens, result)
+      # print(sessions)
+      sessions_cache.extend(sessions)
+      print(sessions_cache)
+
+      data = {
+        'success': True,
+        'cache': '{}'.format(len(sessions_cache))
+      }
+      self.wfile.write(json.dumps(data).encode())
 
     return
 
